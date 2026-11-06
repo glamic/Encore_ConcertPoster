@@ -1,0 +1,767 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#0d0e12">
+  <meta name="description" content="ENCORE — 你的私人演唱会档案馆。保存演出海报、日期、场馆与每一段现场记忆。">
+  <title>ENCORE — 我的演唱会档案馆</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='16' fill='%230d0e12'/%3E%3Cpath d='M14 42V22h7v20zm14 8V14h7v36zm14-13V27h7v10z' fill='%23fa805f'/%3E%3C/svg%3E">
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg: #0d0e12;
+      --panel: #17181f;
+      --panel-2: #20212a;
+      --text: #f8f5f0;
+      --muted: #a09fa9;
+      --muted-2: #71717d;
+      --line: rgba(255,255,255,.105);
+      --accent: #f78b6d;
+      --accent-hot: #f26462;
+      --focus: #ffc09d;
+      --radius: 18px;
+      --shadow: 0 18px 90px rgba(0,0,0,.5);
+    }
+    *, *::before, *::after { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body { margin: 0; min-width: 320px; background: var(--bg); color: var(--text); font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif; -webkit-font-smoothing: antialiased; }
+    button, input, select, textarea { font: inherit; }
+    button { cursor: pointer; }
+    button:disabled { cursor: not-allowed; opacity: .5; }
+    ::selection { background: #fa8b6d70; color: white; }
+    :focus-visible { outline: 2px solid var(--focus); outline-offset: 3px; }
+    svg.icon { width: 18px; height: 18px; flex: 0 0 auto; stroke: currentColor; stroke-width: 1.8; fill: none; stroke-linecap: round; stroke-linejoin: round; }
+    .container { width: 100%; max-width: none; margin: 0 auto; padding: 0 clamp(20px, 3vw, 64px); }
+    .topbar { position: relative; z-index: 1; border-bottom: 1px solid var(--line); }
+    .topbar-inner { display: flex; align-items: center; justify-content: space-between; gap: 20px; min-height: 91px; }
+    .brand { display: inline-flex; align-items: center; gap: 13px; color: var(--text); text-decoration: none; }
+    .brand-symbol { height: 44px; width: 44px; background: var(--accent); color: #101116; border-radius: 12px; display: grid; place-items: center; }
+    .brand-symbol svg { width: 25px; height: 25px; }
+    .brand-title { display: block; font-family: Arial, Helvetica, sans-serif; letter-spacing: -.07em; font-weight: 900; line-height: 1; font-size: 29px; }
+    .brand-caption { display: block; color: #898893; font-size: 10px; letter-spacing: .14em; margin-top: 5px; font-weight: 700; }
+    .top-actions { display: flex; align-items: center; gap: 10px; }
+    .button { display: inline-flex; justify-content: center; align-items: center; gap: 9px; border: 1px solid var(--line); border-radius: 11px; padding: 12px 17px; background: #1a1b22; color: var(--text); font-weight: 700; font-size: 13px; min-height: 44px; transition: background .2s, transform .2s, border-color .2s; white-space: nowrap; }
+    .button:hover { background: #2a2a34; border-color: rgba(255,255,255,.24); transform: translateY(-1px); }
+    .button.primary { background: var(--accent); color: #151015; border-color: transparent; box-shadow: 0 6px 24px rgba(247,139,109,.17); }
+    .button.primary:hover { background: #ffaa8e; }
+    .button.ghost { background: transparent; }
+    .button.danger { background: transparent; color: #ff9a98; border-color: rgba(255,120,120,.27); }
+    .button.danger:hover { background: rgba(255,110,110,.09); }
+    .button.icon-only { width: 42px; height: 42px; min-height: 42px; padding: 0; }
+    .hero { position: relative; isolation: isolate; overflow: hidden; border-bottom: 1px solid var(--line); }
+    .hero::before { content: ""; position: absolute; inset: -400px -200px -320px 35%; z-index: -1; background: radial-gradient(ellipse at 62% 53%, rgba(181,70,71,.17), transparent 46%), radial-gradient(ellipse at 18% 32%, rgba(142,107,191,.13), transparent 44%); pointer-events: none; }
+    .hero-content { min-height: 380px; padding-top: 64px; padding-bottom: 44px; display: grid; grid-template-columns: 1.25fr .75fr; gap: 40px; align-items: center; }
+    .eyebrow { display: flex; align-items: center; gap: 9px; color: var(--accent); letter-spacing: .21em; font-size: 10px; font-weight: 800; text-transform: uppercase; }
+    .eyebrow::before { content: ""; width: 19px; height: 1px; background: currentColor; }
+    h1 { font-size: clamp(41px, 5.2vw, 72px); letter-spacing: -.071em; line-height: 1.14; font-weight: 850; margin: 22px 0 18px; }
+    h1 em { font-weight: inherit; font-style: normal; background: linear-gradient(100deg, #ffb281, #f67b86 73%); -webkit-background-clip: text; background-clip: text; color: transparent; }
+    .hero-desc { margin: 0; color: #aaabb4; font-size: 14px; line-height: 1.9; letter-spacing: .012em; }
+    .stats { display: flex; flex-wrap: wrap; align-items: stretch; margin-top: 30px; gap: 0; }
+    .stat { padding-right: 32px; margin-right: 31px; border-right: 1px solid var(--line); }
+    .stat:last-child { border-right: none; margin-right: 0; }
+    .stat-number { display: block; font-size: 30px; font-weight: 850; letter-spacing: -.055em; font-variant-numeric: tabular-nums; }
+    .stat-label { display: block; color: var(--muted-2); font-size: 11px; margin-top: 4px; font-weight: 600; }
+    .hero-graphic { display: flex; align-items: center; justify-content: center; min-height: 275px; position: relative; }
+    .hero-halo { position: absolute; width: 290px; height: 290px; background: radial-gradient(circle, rgba(242,100,98,.16), transparent 67%); filter: blur(6px); }
+    .ticket-illus { width: 205px; height: 275px; border: 1px solid rgba(255,255,255,.12); border-radius: 13px; padding: 20px; background: linear-gradient(145deg, #393039 0%, #1b1a25 58%, #191a21 100%); transform: rotate(-8deg) translateX(-24px); box-shadow: 25px 30px 60px rgba(0,0,0,.48); position: relative; overflow: hidden; }
+    .ticket-illus::before { content: ""; width: 225px; height: 225px; border: 1px solid rgba(254,171,145,.2); border-radius: 50%; position: absolute; top: 28px; right: -93px; box-shadow: 0 0 0 30px rgba(255,162,153,.018), 0 0 0 65px rgba(255,162,153,.025); }
+    .ticket-illus .tiny { font-size: 9px; letter-spacing: .19em; color: #fcb394; font-weight: 900; }
+    .ticket-illus .vertical { position: absolute; right: 17px; top: 55px; writing-mode: vertical-rl; letter-spacing: .45em; color: #d98f8b; font-size: 9px; font-weight: 800; }
+    .ticket-illus .giant { font-size: 62px; letter-spacing: -.12em; line-height: 1; font-weight: 900; position: relative; top: 61px; left: -3px; color: #f9af99; font-family: Arial, sans-serif; }
+    .ticket-illus .bottom { position: absolute; bottom: 24px; left: 20px; right: 20px; border-top: 1px dashed rgba(255,255,255,.3); padding-top: 12px; display: flex; justify-content: space-between; align-items: center; color: #e0c9c3; font-size: 8px; letter-spacing: .13em; }
+    .ticket-shadow { position: absolute; top: 30px; left: 50%; width: 205px; height: 275px; border-radius: 13px; background: linear-gradient(155deg,#775a5c,#27202c); transform: rotate(10deg) translateX(-5px); border: 1px solid rgba(255,255,255,.08); }
+    .ticket-shadow::after { content: "★"; position: absolute; color: #ffbd9160; font-size: 100px; left: 53px; top: 64px; }
+    main { min-height: 400px; }
+    .collection-top { padding-top: 40px; display: flex; gap: 20px; align-items: flex-end; justify-content: space-between; }
+    .section-overline { text-transform: uppercase; color: var(--accent); font-size: 10px; font-weight: 800; letter-spacing: .18em; }
+    .collection-title { display: flex; align-items: center; gap: 13px; margin: 8px 0 0; }
+    .collection-title h2 { font-size: 27px; line-height: 1.25; letter-spacing: -.05em; margin: 0; }
+    .count { color: #a6a2ad; background: #212129; border: 1px solid var(--line); padding: 3px 9px; border-radius: 30px; font-size: 12px; font-weight: 700; }
+    .view-switch { background: #191a20; border: 1px solid var(--line); padding: 4px; border-radius: 11px; display: flex; gap: 2px; }
+    .view-button { display: inline-flex; gap: 7px; align-items: center; border: none; color: #a3a2ad; background: transparent; border-radius: 8px; padding: 8px 12px; font-size: 12px; font-weight: 700; }
+    .view-button .icon { width: 15px; height: 15px; }
+    .view-button.active { background: #33313a; color: white; box-shadow: 0 1px 5px #0003; }
+    .toolbar { display: flex; align-items: stretch; gap: 12px; margin-top: 25px; margin-bottom: 25px; flex-wrap: wrap; }
+    .search-wrap { position: relative; flex: 1 1 260px; }
+    .search-wrap .icon { position: absolute; left: 16px; top: 50%; transform: translateY(-50%); width: 18px; height: 18px; color: #898995; }
+    .text-input, .select-input { border: 1px solid var(--line); min-height: 47px; border-radius: 11px; background: #191a20; color: var(--text); outline: none; font-size: 13px; transition: border-color .2s, background .2s; }
+    .text-input:focus, .select-input:focus { border-color: rgba(247,139,109,.7); background: #21212a; }
+    .text-input::placeholder { color: #777681; }
+    .search-input { padding: 12px 15px 12px 44px; width: 100%; }
+    .select-input { padding: 0 34px 0 14px; min-width: 128px; appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%239c9aa6' stroke-width='2'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E"); background-position: right 12px center; background-repeat: no-repeat; }
+    .year-section { margin-bottom: 54px; }
+    .year-heading { display: flex; align-items: center; gap: 17px; margin: 35px 0 23px; }
+    .year-heading .year-label { font-size: 28px; font-weight: 850; letter-spacing: -.065em; }
+    .year-heading .year-sub { color: #888892; font-size: 12px; }
+    .year-heading .year-line { height: 1px; background: var(--line); flex: 1; }
+    .grouped-section .year-label { min-width: 0; overflow-wrap: anywhere; font-size: clamp(20px, 2vw, 28px); }
+    .grouped-section .year-sub { white-space: nowrap; flex-shrink: 0; }
+    .grid-cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 27px 24px; }
+    .concert-card { display: block; width: 100%; min-width: 0; border: none; padding: 0; color: inherit; background: none; text-align: left; }
+    .poster-frame { aspect-ratio: 3/4; background: #27242d; border: 1px solid rgba(255,255,255,.08); border-radius: 13px; position: relative; overflow: hidden; isolation: isolate; transition: border-color .2s, box-shadow .2s, transform .2s; }
+    .concert-card:hover .poster-frame, .concert-card:focus-visible .poster-frame { border-color: rgba(255,172,139,.48); transform: translateY(-4px); box-shadow: 0 20px 50px #0008; }
+    .poster-frame img { width: 100%; height: 100%; display: block; object-fit: contain; transition: transform .42s; }
+    .concert-card:hover img { transform: scale(1.04); }
+    .poster-frame::after { content: ""; position: absolute; inset: 0; pointer-events: none; background: linear-gradient(to bottom, transparent 70%, rgba(0,0,0,.32)); }
+    .poster-badge { position: absolute; z-index: 2; left: 12px; top: 12px; border-radius: 6px; padding: 6px 8px; background: rgba(10,11,15,.72); backdrop-filter: blur(10px); font-size: 10px; letter-spacing: .045em; font-weight: 750; }
+    .poster-action { position: absolute; z-index: 2; right: 11px; bottom: 12px; width: 33px; height: 33px; display: grid; place-items: center; color: #161419; border-radius: 50%; background: #fff7f0; opacity: 0; transform: translateY(6px); transition: opacity .2s, transform .2s; }
+    .poster-action .icon { width: 17px; height: 17px; }
+    .concert-card:hover .poster-action, .concert-card:focus-visible .poster-action { opacity: 1; transform: translateY(0); }
+    .poster-fallback { height: 100%; display: flex; flex-direction: column; justify-content: space-between; overflow: hidden; padding: 20px; background: radial-gradient(ellipse at 90% 30%, var(--poster-light), transparent 53%), linear-gradient(145deg, var(--poster-dark), #15151e); }
+    .poster-fallback .poster-top { position: relative; z-index: 1; font-size: 10px; letter-spacing: .18em; font-weight: 900; opacity: .7; }
+    .poster-fallback .poster-initial { font-family: Impact, "Arial Narrow", Arial, sans-serif; font-size: clamp(85px, 13vw, 170px); letter-spacing: -.095em; font-weight: 900; color: rgba(255,255,255,.15); line-height: .9; text-align: center; text-transform: uppercase; position: relative; left: -5px; }
+    .poster-fallback .poster-foot { position: relative; z-index: 1; }
+    .poster-fallback .poster-foot strong { display: block; font-weight: 900; font-size: clamp(18px, 2vw, 27px); line-height: 1.15; letter-spacing: -.04em; overflow-wrap: anywhere; }
+    .poster-fallback .poster-foot small { display: block; margin-top: 11px; color: rgba(255,255,255,.75); font-size: 10px; font-weight: 650; letter-spacing: .12em; }
+    .card-meta { padding: 14px 3px 0; }
+    .card-artist { font-size: 17px; line-height: 1.3; font-weight: 800; letter-spacing: -.035em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .card-tour { color: #a9a7b2; font-size: 12px; margin-top: 5px; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
+    .card-bottom { display: flex; justify-content: space-between; gap: 8px; align-items: center; margin-top: 12px; color: #858591; font-size: 11px; }
+    .card-bottom .place { overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
+    .card-bottom .date { white-space: nowrap; color: #d0b8af; font-weight: 700; font-variant-numeric: tabular-nums; }
+    .empty { text-align: center; margin: 20px 0 90px; background: radial-gradient(ellipse at 50% 0, rgba(233,110,107,.08), transparent 65%), #15161c; border: 1px dashed rgba(255,255,255,.15); border-radius: 18px; padding: 70px 22px 72px; }
+    .empty-icon { margin: 0 auto 20px; display: grid; place-items: center; width: 82px; height: 82px; border: 1px solid #6e4546; border-radius: 22px; background: linear-gradient(145deg,rgba(247,139,109,.16), rgba(247,139,109,.02)); color: #f49c87; transform: rotate(-8deg); }
+    .empty-icon .icon { width: 38px; height: 38px; }
+    .empty h3 { font-size: 24px; letter-spacing: -.045em; margin: 0 0 10px; }
+    .empty p { color: #aaa7b1; font-size: 13px; line-height: 1.9; margin: 0 0 24px; }
+    .timeline { display: flex; flex-direction: column; gap: 12px; }
+    .timeline-item { width: 100%; background: #191a21; color: var(--text); border: 1px solid var(--line); padding: 12px 17px 12px 12px; border-radius: 13px; display: grid; grid-template-columns: 80px 125px minmax(0,1fr) auto; gap: 22px; align-items: center; text-align: left; transition: border-color .2s, background .2s; }
+    .timeline-item:hover { background: #24242e; border-color: rgba(255,172,139,.35); }
+    .timeline-cover { width: 80px; aspect-ratio: .75; border-radius: 7px; overflow: hidden; background: #373040; }
+    .timeline-cover img { width: 100%; height: 100%; object-fit: cover; }
+    .timeline-cover .poster-fallback { padding: 8px; }
+    .timeline-cover .poster-top { font-size: 5px; }
+    .timeline-cover .poster-initial { font-size: 45px; }
+    .timeline-cover .poster-foot strong { font-size: 9px; }
+    .timeline-cover .poster-foot small { display: none; }
+    .timeline-date { font-weight: 850; letter-spacing: -.04em; font-size: 21px; font-variant-numeric: tabular-nums; }
+    .timeline-date small { font-size: 10px; color: var(--muted-2); display: block; letter-spacing: 0; font-weight: 650; margin-top: 5px; }
+    .timeline-info strong { font-size: 19px; font-weight: 800; display: block; }
+    .timeline-info span { color: #9c9ba6; font-size: 12px; margin-top: 6px; display: block; }
+    .timeline-loc { font-size: 12px; color: #b8b3bd; display: flex; align-items: center; gap: 7px; }
+    .timeline-loc .icon { width: 14px; height: 14px; }
+    footer { border-top: 1px solid var(--line); padding: 25px 0 38px; }
+    .footer-inner { display: flex; align-items: center; justify-content: space-between; gap: 20px; color: #6f707b; font-size: 11px; line-height: 1.6; }
+    .footer-inner strong { color: #aaa4a9; letter-spacing: .14em; }
+    dialog { position: fixed; inset: 0; margin: auto; padding: 0; color: var(--text); background: #191a21; border: 1px solid rgba(255,255,255,.17); border-radius: 18px; box-shadow: var(--shadow); max-height: min(94dvh, 950px); max-width: calc(100% - 28px); }
+    dialog::backdrop { background: rgba(4,5,8,.78); backdrop-filter: blur(6px); }
+    #editorDialog { width: 790px; }
+    #detailDialog { width: 790px; }
+    #backupDialog { width: 520px; }
+    .modal-header { padding: 23px 27px 22px; display: flex; align-items: center; justify-content: space-between; gap: 12px; border-bottom: 1px solid var(--line); }
+    .modal-overline { color: var(--accent); font-size: 10px; font-weight: 800; letter-spacing: .16em; text-transform: uppercase; }
+    .modal-header h2 { font-size: 23px; letter-spacing: -.045em; margin: 6px 0 0; }
+    .modal-content { padding: 25px 27px; overflow-y: auto; max-height: calc(94dvh - 185px); }
+    .editor-grid { display: grid; grid-template-columns: 215px minmax(0,1fr); align-items: start; gap: 26px; }
+    .form-label { display: block; margin-bottom: 8px; font-size: 12px; font-weight: 730; color: #dedce4; }
+    .required { color: var(--accent); }
+    .field { min-width: 0; }
+    .field-input { width: 100%; border: 1px solid #393945; background: #23242d; color: var(--text); border-radius: 9px; min-height: 44px; padding: 11px 12px; font-size: 13px; outline: none; }
+    .field-input:focus { border-color: #f6a186; }
+    .field-input::placeholder { color: #777782; }
+    .field-input[type="date"], .field-input[type="time"] { color-scheme: dark; }
+    textarea.field-input { min-height: 91px; resize: vertical; line-height: 1.6; }
+    .form-fields { display: grid; grid-template-columns: 1fr 1fr; column-gap: 12px; row-gap: 16px; }
+    .field-wide { grid-column: 1 / -1; }
+    .field-help { font-size: 11px; color: #8b8996; line-height: 1.65; margin-top: 7px; }
+    .upload-title { font-size: 12px; font-weight: 750; color: #dedce4; margin: 0 0 8px; }
+    .upload-zone { width: 100%; aspect-ratio: 3/4; border: 1px dashed #62606b; border-radius: 11px; background: radial-gradient(circle at 50% 30%, #38303b, #24242d 75%); display: flex; flex-direction: column; justify-content: center; align-items: center; gap: 10px; text-align: center; cursor: pointer; position: relative; overflow: hidden; }
+    .upload-zone.dragging { border-color: var(--accent); background: #353039; }
+    .upload-zone .icon { width: 34px; height: 34px; color: var(--accent); }
+    .upload-zone strong { font-size: 12px; }
+    .upload-zone small { font-size: 10px; color: #aaa7b2; line-height: 1.7; padding: 0 12px; }
+    .upload-zone img { width: 100%; height: 100%; object-fit: cover; position: absolute; inset: 0; }
+    .upload-zone img + .upload-overlay { position: absolute; inset: auto 0 0; background: linear-gradient(transparent, rgba(0,0,0,.8)); padding: 42px 10px 13px; font-weight: 750; font-size: 12px; }
+    .poster-controls { display: flex; gap: 8px; justify-content: center; margin-top: 11px; }
+    .text-button { background: transparent; border: 0; color: #c6a9ab; font-size: 11px; padding: 4px; text-decoration: underline; text-underline-offset: 3px; }
+    .text-button:hover { color: #ffb295; }
+    .modal-footer { padding: 17px 27px; display: flex; align-items: center; justify-content: flex-end; gap: 10px; border-top: 1px solid var(--line); }
+    .detail-body { display: grid; grid-template-columns: 245px minmax(0,1fr); gap: 27px; }
+    .detail-image { aspect-ratio: 3/4; border-radius: 11px; background: #37303b; overflow: hidden; }
+    .detail-image img { display: block; width: 100%; height: 100%; object-fit: cover; }
+    .detail-image .poster-fallback { padding: 17px; }
+    .detail-image .poster-initial { font-size: 130px; }
+    .detail-info h3 { font-size: 30px; letter-spacing: -.06em; margin: 5px 0 8px; line-height: 1.15; overflow-wrap: anywhere; }
+    .detail-tour { color: #a8a6b0; font-size: 14px; line-height: 1.5; }
+    .detail-divider { height: 1px; background: var(--line); margin: 24px 0; }
+    .detail-row { margin: 0 0 19px; display: grid; grid-template-columns: 22px 1fr; gap: 10px; color: #ebeaee; font-size: 14px; line-height: 1.6; }
+    .detail-row .icon { margin-top: 2px; color: var(--accent); }
+    .detail-row small { display: block; color: #84828e; font-size: 11px; margin-bottom: 3px; }
+    .note-box { background: #24242e; border: 1px solid var(--line); padding: 13px 14px; border-radius: 10px; white-space: pre-wrap; overflow-wrap: anywhere; line-height: 1.7; font-size: 13px; color: #cfcbd2; margin-top: 9px; }
+    .backup-intro { font-size: 13px; line-height: 1.9; color: #bdbbc4; margin: 0 0 20px; }
+    .backup-option { display: flex; align-items: center; justify-content: space-between; gap: 15px; padding: 18px; background: #24242d; border: 1px solid var(--line); border-radius: 12px; margin-top: 11px; }
+    .backup-option .icon { color: var(--accent); }
+    .backup-option-title { display: flex; align-items: center; gap: 8px; font-weight: 760; font-size: 14px; }
+    .backup-option p { color: #9795a0; font-size: 11px; line-height: 1.6; margin: 6px 0 0; }
+    .backup-tip { color: #a99e9f; margin-top: 17px; line-height: 1.8; font-size: 11px; }
+    .toast { position: fixed; bottom: 23px; left: 50%; transform: translate(-50%, 20px); border: 1px solid rgba(255,255,255,.14); border-radius: 12px; box-shadow: var(--shadow); background: #2b2a32; color: white; font-size: 13px; padding: 13px 18px; opacity: 0; pointer-events: none; transition: opacity .2s, transform .2s; z-index: 999; max-width: calc(100% - 30px); text-align: center; }
+    .toast.active { opacity: 1; transform: translate(-50%,0); }
+    .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; border: 0; }
+    @media (min-width: 1300px) { .hero-content { min-height: 425px; } }
+    @media (max-width: 1100px) { .container { padding-left: 30px; padding-right: 30px; } .hero-content { grid-template-columns: 1.4fr .6fr; } }
+    @media (max-width: 740px) { .container { padding-left: 20px; padding-right: 20px; } .topbar-inner { min-height: 76px; } .brand-title { font-size: 25px; } .brand-symbol { height: 39px; width: 39px; } .top-actions { gap: 7px; } .top-backup-label { display: none; } .top-actions .button { padding: 10px 12px; } .top-actions .button.icon-mobile { padding: 0; width: 42px; height: 42px; } .hero-content { padding-top: 48px; padding-bottom: 35px; min-height: auto; display: block; } .hero-graphic { display: none; } h1 { font-size: clamp(40px,8vw,59px); } .stats { margin-top: 31px; } .stat { padding-right: 22px; margin-right: 22px; } .grid-cards { grid-template-columns: repeat(2,minmax(0,1fr)); gap: 25px 13px; } .collection-top { padding-top: 32px; } .collection-title h2 { font-size: 24px; } .card-artist { font-size: 15px; } .card-bottom { display: block; line-height: 1.7; } .card-bottom .date { display: block; } .poster-fallback .poster-initial { font-size: 100px; } .poster-fallback .poster-foot strong { font-size: 20px; } .poster-fallback { padding: 14px; } .timeline-item { grid-template-columns: 67px 90px minmax(0,1fr); gap: 11px; padding: 10px; } .timeline-cover { width: 67px; } .timeline-date { font-size: 16px; } .timeline-info strong { font-size: 15px; } .timeline-loc { display: none; } .editor-grid { grid-template-columns: 1fr; } .upload-zone { width: 155px; } .upload-title { margin-top: 0; } .upload-sidebar { display: flex; align-items: center; gap: 17px; flex-wrap: wrap; } .upload-sidebar-help { flex: 1; min-width: 130px; } .detail-body { grid-template-columns: 165px 1fr; gap: 16px; } .detail-info h3 { font-size: 24px; } .modal-content { padding: 20px; } .modal-header, .modal-footer { padding-left: 20px; padding-right: 20px; } }
+    @media (max-width: 490px) { .collection-top { gap: 10px; } .brand-caption { display: none; } .top-actions .button.primary { padding: 10px 11px; font-size: 12px; } .hero-desc { font-size: 13px; } h1 { font-size: 43px; } .stat-number { font-size: 27px; } .stat { margin-right: 16px; padding-right: 16px; } .view-button { padding: 8px 9px; } .view-button .view-label { display: none; } .toolbar { gap: 9px; } .toolbar .select-input { flex: 1 1 calc(50% - 5px); min-width: 0; width: calc(50% - 5px); } .search-wrap { flex-basis: 100%; } .poster-fallback .poster-initial { font-size: 75px; } .poster-fallback .poster-foot strong { font-size: 17px; } .poster-fallback .poster-top, .poster-fallback .poster-foot small { font-size: 8px; } .poster-badge { left: 8px; top: 8px; padding: 5px 6px; } .poster-action { opacity: 1; transform: none; width: 27px; height: 27px; right: 9px; bottom: 9px; } .card-meta { padding-top: 11px; } .card-tour { font-size: 11px; } .year-heading { margin-top: 28px; } .timeline-item { grid-template-columns: 61px minmax(0,1fr); } .timeline-cover { width: 61px; } .timeline-date { display: none; } .timeline-info span { line-height: 1.6; } .footer-inner { display: block; } .footer-inner > span { display: block; margin-top: 6px; } .form-fields { grid-template-columns: 1fr 1fr; } .detail-body { grid-template-columns: 1fr; } .detail-image { width: 165px; } .detail-info h3 { margin-top: 5px; } .modal-footer { flex-wrap: wrap; } .modal-footer .button { padding-left: 12px; padding-right: 12px; } .backup-option { align-items: flex-start; } .backup-option .button { font-size: 11px; padding: 10px; } }
+    @media (max-width: 360px) { .topbar-inner { gap: 8px; } .brand { gap: 6px; } .brand-title { font-size: 21px; } .brand-symbol { width: 32px; height: 32px; } .top-actions { gap: 5px; } .top-actions .button.primary { padding: 10px 8px; font-size: 11px; gap: 5px; } .top-actions .button.icon-mobile { width: 34px; } }
+    @media (prefers-reduced-motion: reduce) { *, *::before, *::after { transition: none !important; scroll-behavior: auto !important; } }
+  </style>
+</head>
+<body>
+  <svg class="sr-only" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false">
+    <symbol id="i-plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></symbol>
+    <symbol id="i-search" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m20 20-4-4"/></symbol>
+    <symbol id="i-grid" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></symbol>
+    <symbol id="i-list" viewBox="0 0 24 24"><path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/></symbol>
+    <symbol id="i-box" viewBox="0 0 24 24"><rect width="18" height="14" x="3" y="5" rx="2"/><path d="m3 14 5-5 4 4 3-3 6 5"/></symbol>
+    <symbol id="i-arrow" viewBox="0 0 24 24"><path d="M5 12h14m-6-6 6 6-6 6"/></symbol>
+    <symbol id="i-x" viewBox="0 0 24 24"><path d="M18 6 6 18M6 6l12 12"/></symbol>
+    <symbol id="i-upload" viewBox="0 0 24 24"><path d="M12 16V3m-5 5 5-5 5 5M4 16v3a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-3"/></symbol>
+    <symbol id="i-download" viewBox="0 0 24 24"><path d="M12 3v12m-5-5 5 5 5-5M4 17v3h16v-3"/></symbol>
+    <symbol id="i-calendar" viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M16 3v4M8 3v4M3 10h18"/></symbol>
+    <symbol id="i-pin" viewBox="0 0 24 24"><path d="M20 10c0 5-8 11-8 11S4 15 4 10a8 8 0 1 1 16 0Z"/><circle cx="12" cy="10" r="2.5"/></symbol>
+    <symbol id="i-edit" viewBox="0 0 24 24"><path d="M12 20h9M16 5l3 3M4 20l4-1 12-12a2.12 2.12 0 0 0-3-3L5 16l-1 4Z"/></symbol>
+    <symbol id="i-shield" viewBox="0 0 24 24"><path d="M12 22s8-4 8-11V5l-8-3-8 3v6c0 7 8 11 8 11Z"/><path d="m9 12 2 2 4-4"/></symbol>
+    <symbol id="i-music" viewBox="0 0 24 24"><path d="M9 18V5l12-2v13M9 18a3 3 0 1 1-3-3c1.66 0 3 1.34 3 3ZM21 16a3 3 0 1 1-3-3c1.66 0 3 1.34 3 3Z"/></symbol>
+  </svg>
+
+  <header class="topbar">
+    <div class="container topbar-inner">
+      <a class="brand" href="#top" aria-label="ENCORE 首页">
+        <span class="brand-symbol"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true" style="stroke-width:3"><path d="M4 16V8M10 20V4M16 16V8M22 13v-2"/></svg></span>
+        <span><span class="brand-title">ENCORE<span style="color:var(--accent)">.</span></span><span class="brand-caption">MY LIVE MUSIC ARCHIVE</span></span>
+      </a>
+      <div class="top-actions">
+        <button id="backupBtn" class="button ghost icon-mobile" type="button" aria-label="备份与恢复"><svg class="icon" aria-hidden="true"><use href="#i-download"/></svg><span class="top-backup-label">备份 / 恢复</span></button>
+        <button class="button primary" type="button" data-add><svg class="icon" aria-hidden="true"><use href="#i-plus"/></svg>新增演唱会</button>
+      </div>
+    </div>
+  </header>
+
+  <section class="hero" id="top">
+    <div class="container hero-content">
+      <div>
+        <div class="eyebrow">A LITTLE ARCHIVE OF BIG NIGHTS</div>
+        <h1>每一场现场，<br><em>都有回声。</em></h1>
+        <p class="hero-desc">收藏那些灯光亮起的瞬间。海报、日期、城市、场馆，<br>和每一次你真正站在人群中的记忆。</p>
+        <div class="stats" aria-label="演唱会收藏统计">
+          <div class="stat"><span class="stat-number" id="statShows">0</span><span class="stat-label">档案中的演出</span></div>
+          <div class="stat"><span class="stat-number" id="statCities">0</span><span class="stat-label">记录的城市</span></div>
+          <div class="stat"><span class="stat-number" id="statYears">0</span><span class="stat-label">记录的年份</span></div>
+        </div>
+      </div>
+      <div class="hero-graphic" aria-hidden="true"><div class="hero-halo"></div><div class="ticket-shadow"></div><div class="ticket-illus"><div class="tiny">A NIGHT TO REMEMBER</div><div class="vertical">KEEP THE FEELING ALIVE</div><div class="giant">LIVE<br>ON.</div><div class="bottom"><span>ONE MORE TIME</span><span>★ ★ ★</span></div></div></div>
+    </div>
+  </section>
+
+  <main class="container" id="archive">
+    <div class="collection-top">
+      <div><div class="section-overline">THE COLLECTION</div><div class="collection-title"><h2>我的现场</h2><span id="collectionCount" class="count">0 场</span></div></div>
+      <div class="view-switch" role="group" aria-label="切换显示方式">
+        <button class="view-button active" id="gridViewBtn" type="button" aria-label="海报墙" aria-pressed="true"><svg class="icon" aria-hidden="true"><use href="#i-grid"/></svg><span class="view-label">海报墙</span></button>
+        <button class="view-button" id="timelineViewBtn" type="button" aria-label="时间线" aria-pressed="false"><svg class="icon" aria-hidden="true"><use href="#i-list"/></svg><span class="view-label">时间线</span></button>
+      </div>
+    </div>
+    <div class="toolbar">
+      <div class="search-wrap"><svg class="icon" aria-hidden="true"><use href="#i-search"/></svg><input class="text-input search-input" id="searchInput" type="search" autocomplete="off" placeholder="搜索艺人、巡演、城市或场馆…" aria-label="搜索演唱会"></div>
+      <select class="select-input" id="groupSelect" aria-label="展示分组"><option value="flat" selected>连续平铺</option><option value="time">按时间分组</option><option value="artist">按艺人分组</option><option value="city">按城市分组</option><option value="venue">按场馆分组</option><option value="region">海内外分组</option><option value="artistCategory">华语 / 国际</option></select>
+      <select class="select-input" id="groupFilter" aria-label="按年份筛选"><option value="all">所有年份</option></select>
+      <select class="select-input" id="sortSelect" aria-label="排序方式"><option value="new">时间：最近优先</option><option value="old">时间：最早优先</option><option value="artist">艺人：名称排序</option></select>
+    </div>
+    <div id="collection" aria-live="polite"></div>
+  </main>
+
+  <footer><div class="container footer-inner"><strong>ENCORE<span style="color:var(--accent)">.</span> / MADE FOR MEMORIES</strong><span>私人收藏 · 默认仅保存在本设备的当前浏览器 · 请定期导出备份</span></div></footer>
+
+  <dialog id="editorDialog" aria-labelledby="editorTitle">
+    <form id="editorForm">
+      <div class="modal-header"><div><div class="modal-overline">ARCHIVE A SHOW</div><h2 id="editorTitle">记录一场演唱会</h2></div><button class="button icon-only ghost" type="button" data-close="editorDialog" aria-label="关闭"><svg class="icon"><use href="#i-x"/></svg></button></div>
+      <div class="modal-content">
+        <div class="editor-grid">
+          <div class="upload-sidebar">
+            <div><div class="upload-title">演唱会海报</div><div class="upload-zone" id="uploadZone" role="button" tabindex="0" aria-label="上传或更换海报图片"><svg class="icon" aria-hidden="true"><use href="#i-upload"/></svg><strong>点击上传海报</strong><small>也可以拖入图片<br>JPG · PNG · WebP</small></div><div class="poster-controls"><button id="removePosterBtn" class="text-button" type="button" hidden>移除当前海报</button></div></div>
+            <div class="upload-sidebar-help"><p class="field-help">上传后会自动压缩图片，便于长期保存。海报可以稍后再补充。</p></div>
+            <input id="posterInput" type="file" accept="image/png,image/jpeg,image/webp,image/gif" class="sr-only">
+          </div>
+          <div class="form-fields">
+            <div class="field field-wide"><label class="form-label" for="artistInput">艺人 / 乐队 <span class="required">*</span></label><input id="artistInput" name="artist" class="field-input" maxlength="120" required placeholder="输入新艺人或选择已有艺人" autocomplete="off" list="artistSuggestions"><datalist id="artistSuggestions"></datalist></div>
+            <div class="field"><label class="form-label" for="artistCategoryInput">艺人分类 <span class="required">*</span></label><select id="artistCategoryInput" name="artistCategory" class="field-input" required><option value="">请选择分类</option><option value="chinese">华语艺人</option><option value="international">国际艺人</option></select></div>
+            <div class="field"><label class="form-label" for="dateInput">演出日期 <span class="required">*</span></label><input id="dateInput" name="date" class="field-input" type="date" required></div>
+            <div class="field field-wide"><label class="form-label" for="tourInput">巡演 / 演出名称</label><input id="tourInput" name="tour" class="field-input" maxlength="160" placeholder="填写巡演或演出名称" autocomplete="off"></div>
+            <div class="field"><label class="form-label" for="cityInput">城市 <span class="required">*</span></label><input id="cityInput" name="city" class="field-input" maxlength="100" required placeholder="填写演出城市" autocomplete="off"></div>
+            <div class="field"><label class="form-label" for="regionInput">演出地区 <span class="required">*</span></label><select id="regionInput" name="region" class="field-input" required><option value="">请选择地区</option><option value="domestic">国内（内地）</option><option value="overseas">海外及港澳台</option></select></div>
+            <div class="field field-wide"><label class="form-label" for="venueInput">演出场馆</label><input id="venueInput" name="venue" class="field-input" maxlength="160" placeholder="填写场馆名称" autocomplete="off"></div>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer"><button class="button ghost" type="button" data-close="editorDialog">取消</button><button id="saveBtn" class="button primary" type="submit"><svg class="icon"><use href="#i-plus"/></svg>保存到档案馆</button></div>
+    </form>
+  </dialog>
+
+  <dialog id="detailDialog" aria-labelledby="detailTitle"><div class="modal-header"><div><div class="modal-overline">ONE NIGHT, ONE MEMORY</div><h2>演出档案</h2></div><button class="button ghost icon-only" type="button" data-close="detailDialog" aria-label="关闭"><svg class="icon"><use href="#i-x"/></svg></button></div><div class="modal-content" id="detailContent"></div><div class="modal-footer"><button class="button danger" type="button" id="deleteBtn">删除记录</button><span style="flex:1"></span><button class="button primary" type="button" id="editBtn"><svg class="icon"><use href="#i-edit"/></svg>编辑记录</button></div></dialog>
+
+  <dialog id="backupDialog" aria-labelledby="backupTitle"><div class="modal-header"><div><div class="modal-overline">KEEP YOUR COLLECTION SAFE</div><h2 id="backupTitle">备份与恢复</h2></div><button class="button ghost icon-only" type="button" data-close="backupDialog" aria-label="关闭"><svg class="icon"><use href="#i-x"/></svg></button></div><div class="modal-content"><p class="backup-intro">你的记录和海报保存在当前浏览器的本地数据库中，不会自动上传到任何服务器。为了避免更换设备或清理浏览器时丢失，建议定期备份。</p><div class="backup-option"><div><div class="backup-option-title"><svg class="icon"><use href="#i-download"/></svg>导出完整档案</div><p>下载 JSON 文件，包含所有记录及海报图片。</p></div><button class="button primary" id="exportBtn" type="button">导出备份</button></div><div class="backup-option"><div><div class="backup-option-title"><svg class="icon"><use href="#i-upload"/></svg>从备份恢复</div><p>把导出的 JSON 文件导入，合并到现有收藏。</p></div><button class="button" id="importBtn" type="button">导入文件</button></div><p class="backup-tip">提示：如果准备在 Mac、iPad 或不同浏览器之间使用，可以从一台设备导出，再在另一台设备导入。同一份网页不会自动跨设备同步。</p><input id="importInput" type="file" accept=".json,application/json" class="sr-only"></div><div class="modal-footer"><button class="button ghost" type="button" data-close="backupDialog">完成</button></div></dialog>
+
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+  <script>
+  (() => {
+    'use strict';
+    const DB_NAME = 'encore-archive-v2';
+    const STORE_NAME = 'concerts';
+    const FALLBACK_KEY = 'encore-archive-fallback-v2';
+    let memoryEntries = [];
+    const $ = (sel) => document.querySelector(sel);
+    const icons = (name) => `<svg class="icon" aria-hidden="true"><use href="#i-${name}"/></svg>`;
+    const fields = ['artist','tour','date','time','city','country','venue','seat','notes'];
+    const editorFields = ['artist','artistCategory','tour','date','city','region','venue'];
+    let categoryArtistKey = '';
+    let regionCityKey = '';
+    let shows = [], editingId = null, detailId = null, pendingPoster = null, viewMode = 'grid', db = null, fallbackMode = false, memoryMode = false, toastTimer = null;
+
+    function escapeHtml(value='') { return String(value).replace(/[&<>\"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+    function safePoster(value) { return typeof value === 'string' && /^data:image\/(?:jpeg|png|webp|gif);base64,[A-Za-z0-9+/=]+$/.test(value) && value.length < 12000000 ? value : null; }
+    function uniqueId() { return (globalThis.crypto && crypto.randomUUID) ? crypto.randomUUID() : 'enc-' + Date.now() + '-' + Math.random().toString(36).slice(2,11); }
+    function pad(n) { return String(n).padStart(2,'0'); }
+    function niceDate(date) { if (!/^\d{4}-\d{2}-\d{2}$/.test(date || '')) return date || '—'; const [y,m,d] = date.split('-'); return `${y}.${m}.${d}`; }
+    function shortDate(date) { return date ? date.substring(5).replace('-','.') : '—'; }
+    function dayOfWeek(date) { if (!/^\d{4}-\d{2}-\d{2}$/.test(date || '')) return ''; const d = new Date(`${date}T12:00:00`); return Number.isNaN(d.getTime()) ? '' : new Intl.DateTimeFormat('zh-CN',{weekday:'long'}).format(d); }
+    function notify(message) { const el = $('#toast'); el.textContent = message; el.classList.add('active'); clearTimeout(toastTimer); toastTimer = setTimeout(() => el.classList.remove('active'), 3300); }
+    function openDialog(id) { const d = document.getElementById(id); if (!d.open) d.showModal(); }
+    function closeDialog(id) { const d = document.getElementById(id); if (d && d.open) d.close(); }
+    function verifyShow(raw) {
+      if (!raw || typeof raw !== 'object' || Array.isArray(raw)) return null;
+      const output = {};
+      for (const field of fields) output[field] = typeof raw[field] === 'string' ? raw[field].trim().slice(0,field==='notes'?4000:160) : '';
+      const category = artistCategoryFor({...raw,artist:output.artist});
+      output.artistCategory = category === '华语艺人' ? 'chinese' : category === '国际艺人' ? 'international' : '';
+      const region = regionFor({...raw,city:output.city,country:output.country});
+      output.region = region === '国内（内地）' ? 'domestic' : region === '海外及港澳台' ? 'overseas' : '';
+      if (!output.artist || !output.city || !/^\d{4}-\d{2}-\d{2}$/.test(output.date)) return null;
+      const checkedDate = new Date(`${output.date}T12:00:00`);
+      if (Number.isNaN(checkedDate.getTime()) || `${checkedDate.getFullYear()}-${pad(checkedDate.getMonth()+1)}-${pad(checkedDate.getDate())}` !== output.date) return null;
+      if (output.time && !/^([01]\d|2[0-3]):[0-5]\d$/.test(output.time)) output.time = '';
+      output.id = typeof raw.id === 'string' && /^[\w-]{4,100}$/.test(raw.id) ? raw.id : uniqueId();
+      output.poster = safePoster(raw.poster);
+      output.createdAt = typeof raw.createdAt === 'string' ? raw.createdAt.slice(0,40) : new Date().toISOString();
+      output.updatedAt = typeof raw.updatedAt === 'string' ? raw.updatedAt.slice(0,40) : new Date().toISOString();
+      return output;
+    }
+
+    async function initDB() {
+      try {
+        db = await new Promise((resolve,reject) => {
+          if (!('indexedDB' in window)) return reject(new Error('IndexedDB unavailable'));
+          const request = indexedDB.open(DB_NAME, 1);
+          request.onupgradeneeded = () => { const database = request.result; if (!database.objectStoreNames.contains(STORE_NAME)) database.createObjectStore(STORE_NAME,{keyPath:'id'}); };
+          request.onsuccess = () => resolve(request.result);
+          request.onerror = () => reject(request.error || new Error('Cannot open database'));
+          request.onblocked = () => reject(new Error('Database blocked'));
+        });
+      } catch (err) {
+        fallbackMode = true;
+        try { localStorage.getItem(FALLBACK_KEY); } catch { memoryMode = true; }
+        notify(memoryMode ? '当前环境阻止本地存储：记录只能在本次打开期间保留，请使用常规浏览器' : '当前浏览器使用兼容存储模式，请定期导出备份');
+      }
+    }
+    function queryDB(mode, action) {
+      return new Promise((resolve,reject) => {
+        try {
+          const tx = db.transaction(STORE_NAME, mode);
+          const store = tx.objectStore(STORE_NAME);
+          let result;
+          const req = action(store);
+          if (req) { req.onsuccess = () => { result = req.result; }; req.onerror = () => reject(req.error); }
+          tx.oncomplete = () => resolve(result);
+          tx.onerror = () => reject(tx.error || new Error('Database error'));
+          tx.onabort = () => reject(tx.error || new Error('Database aborted'));
+        } catch(err) { reject(err); }
+      });
+    }
+    function fallbackEntries() {
+      if (memoryMode) return memoryEntries;
+      const entries = JSON.parse(localStorage.getItem(FALLBACK_KEY) || '[]');
+      if (!Array.isArray(entries)) throw new Error('本地档案格式异常，请先恢复备份');
+      return entries;
+    }
+    async function loadShows() {
+      const entries = fallbackMode ? fallbackEntries() : await queryDB('readonly', s => s.getAll());
+      return entries.map(verifyShow).filter(Boolean);
+    }
+    async function saveMany(items) {
+      const entries = items;
+      if (fallbackMode) {
+        const map = new Map(fallbackEntries().map(s => [s.id,s]));
+        for (const item of entries) map.set(item.id,item);
+        if (memoryMode) memoryEntries = [...map.values()];
+        else localStorage.setItem(FALLBACK_KEY, JSON.stringify([...map.values()]));
+        return;
+      }
+      await queryDB('readwrite', s => { for (const item of entries) s.put(item); });
+    }
+    async function removeOne(id) {
+      if (fallbackMode) {
+        const entries = fallbackEntries().filter(s => s.id !== id);
+        if (memoryMode) memoryEntries = entries;
+        else localStorage.setItem(FALLBACK_KEY,JSON.stringify(entries));
+        return;
+      }
+      await queryDB('readwrite', s => s.delete(id));
+    }
+    function colorFor(show) {
+      const palette = [['#5d2e4f','#aa536c'],['#283c66','#7262b2'],['#574036','#ad6751'],['#274f52','#4d9794'],['#45345c','#98709f'],['#543a56','#be8f6b']];
+      const val = [...show.artist].reduce((a,c)=>a+c.charCodeAt(0),0);
+      return palette[val % palette.length];
+    }
+    function fallbackPoster(show) {
+      const [dark,light] = colorFor(show);
+      const initial = (show.artist.trim().match(/[A-Za-z0-9]/) || [show.artist.trim().charAt(0) || '★'])[0];
+      return `<div class="poster-fallback" style="--poster-dark:${dark};--poster-light:${light}a0"><div class="poster-top">ENCORE / LIVE ARCHIVE</div><div class="poster-initial">${escapeHtml(initial)}</div><div class="poster-foot"><strong>${escapeHtml(show.artist)}</strong><small>${escapeHtml(show.city)} · ${escapeHtml(show.date.slice(0,4))}</small></div></div>`;
+    }
+    function imageOrFallback(show) { return safePoster(show.poster) ? `<img src="${show.poster}" data-poster-id="${show.id}" alt="${escapeHtml(show.artist)} · ${escapeHtml(show.tour)} 演唱会海报" loading="lazy">` : fallbackPoster(show); }
+    function cardMarkup(show) {
+      return `<button type="button" class="concert-card" data-open="${show.id}" aria-label="查看 ${escapeHtml(show.artist)} ${escapeHtml(niceDate(show.date))} 演唱会记录"><div class="poster-frame">${imageOrFallback(show)}<span class="poster-badge">${escapeHtml(show.date.slice(0,4))}</span><span class="poster-action">${icons('arrow')}</span></div><div class="card-meta"><div class="card-artist">${escapeHtml(show.artist)}</div><div class="card-tour">${escapeHtml(show.tour || 'LIVE IN ' + show.city)}</div><div class="card-bottom"><span class="place">${icons('pin')} ${escapeHtml(show.city)}${show.venue ? ' · ' + escapeHtml(show.venue) : ''}</span><span class="date">${escapeHtml(shortDate(show.date))}</span></div></div></button>`;
+    }
+    function timelineMarkup(show) {
+      return `<button type="button" class="timeline-item" data-open="${show.id}" aria-label="查看 ${escapeHtml(show.artist)} 演唱会记录"><span class="timeline-cover">${imageOrFallback(show)}</span><span class="timeline-date">${escapeHtml(shortDate(show.date))}<small>${escapeHtml(dayOfWeek(show.date))}${show.time ? ' · ' + escapeHtml(show.time):''}</small></span><span class="timeline-info"><strong>${escapeHtml(show.artist)}</strong><span>${escapeHtml(show.tour || '现场演出')} · ${escapeHtml(show.city)}</span></span><span class="timeline-loc">${icons('pin')}${escapeHtml(show.venue || show.city)}</span></button>`;
+    }
+    function normalizedArtist(name) { return String(name || '').normalize('NFKC').replace(/[\s.·_—-]/g,'').toLocaleLowerCase(); }
+    const chineseArtists = new Set(['蔡依林','Jolin Tsai','林忆莲','林憶蓮','Sandy Lam','单依纯','單依純','Shan Yichun','焦迈奇','焦邁奇','梁静茹','梁靜茹','Fish Leong','马赛克乐队','馬賽克樂隊','Mosaic','五月天','Mayday','王力宏','Leehom Wang','Wang Leehom','王心凌','Cyndi Wang','新裤子','新褲子','New Pants','杨丞琳','楊丞琳','Rainie Yang','张惠妹','張惠妹','aMEI','张韶涵','張韶涵','Angela Chang','张蔷','張薔','Ty.','Tydot','3unshine'].map(normalizedArtist));
+    const internationalArtists = new Set(['Britney Spears','The Chainsmokers','Dua Lipa','Imagine Dragons','Katy Perry','Kylie Minogue','Lady GaGa','Madonna','Mariah Carey','OneRepublic','Shakira','Taylor Swift','The Weeknd','Tinashe'].map(normalizedArtist));
+    function artistCategoryFor(show) {
+      if (show.artistCategory === 'chinese') return '华语艺人';
+      if (show.artistCategory === 'international') return '国际艺人';
+      const artist = normalizedArtist(show.artist);
+      if (chineseArtists.has(artist)) return '华语艺人';
+      if (internationalArtists.has(artist)) return '国际艺人';
+      return '未分类艺人';
+    }
+    function suggestedArtistCategory(name) {
+      const key = normalizedArtist(name);
+      if (!key) return '';
+      const saved = shows.filter(s => normalizedArtist(s.artist) === key && ['chinese','international'].includes(s.artistCategory))
+        .sort((a,b) => (b.updatedAt || '').localeCompare(a.updatedAt || ''))[0];
+      const category = artistCategoryFor(saved || {artist:name});
+      return category === '华语艺人' ? 'chinese' : category === '国际艺人' ? 'international' : '';
+    }
+    function updateArtistCategory() {
+      const name = $('#artistInput').value;
+      const key = normalizedArtist(name);
+      if (key === categoryArtistKey) return;
+      categoryArtistKey = key;
+      $('#artistCategoryInput').value = suggestedArtistCategory(name);
+    }
+    function normalizedCity(name) { return String(name || '').normalize('NFKC').trim().replace(/\s+/g,' ').replace(/市$/,'').toLocaleLowerCase(); }
+    function savedCityRegion(name) {
+      const key = normalizedCity(name);
+      if (!key) return '';
+      const saved = shows.filter(s => normalizedCity(s.city) === key && ['domestic','overseas'].includes(s.region))
+        .sort((a,b) => (b.updatedAt || '').localeCompare(a.updatedAt || ''))[0];
+      return saved?.region || '';
+    }
+    function updateCityRegion() {
+      const name = $('#cityInput').value;
+      const key = normalizedCity(name);
+      if (key === regionCityKey) return;
+      regionCityKey = key;
+      $('#regionInput').value = savedCityRegion(name);
+    }
+    function relatedRecordUpdates(show) {
+      return shows.filter(s => s.id !== show.id).flatMap(s => {
+        const changes = {};
+        if (normalizedArtist(s.artist) === normalizedArtist(show.artist) && s.artistCategory !== show.artistCategory) changes.artistCategory = show.artistCategory;
+        if (normalizedCity(s.city) === normalizedCity(show.city) && s.region !== show.region) changes.region = show.region;
+        return Object.keys(changes).length ? [{...s,...changes,updatedAt:show.updatedAt}] : [];
+      });
+    }
+    function cityLabel(show) { return (show.city || '').trim().replace(/\s+/g,' ').replace(/市$/,'') || '未填写城市'; }
+    const mainlandCities = new Set('北京 天津 上海 重庆 成都 杭州 西安 广州 深圳 南京 苏州 武汉 长沙 合肥 郑州 济南 青岛 厦门 福州 泉州 南昌 南宁 昆明 贵阳 海口 三亚 太原 石家庄 沈阳 大连 长春 哈尔滨 呼和浩特 兰州 西宁 银川 乌鲁木齐 拉萨 宁波 温州 东莞 佛山 无锡 珠海 中山 惠州'.split(' '));
+    const overseasCities = new Set(['东京','東京','首尔','首爾','曼谷','新加坡','比什凯克','比什凱克','Tokyo','Seoul','Bangkok','Singapore','Bishkek'].map(s => s.toLocaleLowerCase()));
+    function regionFor(show) {
+      if (show.region === 'domestic') return '国内（内地）';
+      if (show.region === 'overseas') return '海外及港澳台';
+      return legacyRegionFor(show);
+    }
+    function legacyRegionFor(show) {
+      const city = cityLabel(show).toLocaleLowerCase().replace(/\s+/g,'');
+      const country = (show.country || '').trim().toLocaleLowerCase().replace(/\s+/g,'');
+      const place = city + ' ' + country;
+      if (/香港|澳门|澳門|台湾|臺灣|台北|臺北|高雄|hongkong|macao|macau|taiwan/.test(place)) return '海外及港澳台';
+      if (/^(中国|中國)/.test(country) || ['中国大陆','中国内地','内地','大陆','china','mainlandchina','prc','cn','chn'].includes(country)) return '国内（内地）';
+      if (country && !['未知','待定','unknown','n/a','na','-','—'].includes(country)) return '海外及港澳台';
+      if (mainlandCities.has(city)) return '国内（内地）';
+      if (overseasCities.has(city)) return '海外及港澳台';
+      return '地区待补充';
+    }
+    function venueLabel(show) {
+      const venue = (show.venue || '').trim().replace(/\s+/g,' ');
+      return venue ? cityLabel(show) + ' · ' + venue : '未填写场馆';
+    }
+    function venueKey(show) {
+      const venue = (show.venue || '').normalize('NFKC').trim().replace(/\s+/g,' ').toLocaleLowerCase();
+      return venue ? JSON.stringify([cityLabel(show).toLocaleLowerCase(),venue]) : 'no-venue';
+    }
+    function geographicGroups(items,kind) {
+      const groups = new Map();
+      const labels = new Map();
+      for (const show of items) {
+        const label = kind === 'venue' ? venueLabel(show) : kind === 'artist' ? show.artist.trim() : kind === 'city' ? cityLabel(show) : kind === 'region' ? regionFor(show) : artistCategoryFor(show);
+        const key = kind === 'venue' ? venueKey(show) : kind === 'artist' ? normalizedArtist(label) : kind === 'city' ? label.toLocaleLowerCase() : label;
+        if (!groups.has(key)) { groups.set(key,[]); labels.set(key,label); }
+        groups.get(key).push(show);
+      }
+      const entries = [...groups].map(([key,list]) => [labels.get(key),list]);
+      if (kind === 'city' || kind === 'artist' || kind === 'venue') return entries.sort((a,b) => b[1].length-a[1].length || a[0].localeCompare(b[0],'zh-CN'));
+      const order = kind === 'region' ? ['国内（内地）','海外及港澳台','地区待补充'] : ['华语艺人','国际艺人','未分类艺人'];
+      return entries.sort((a,b) => order.indexOf(a[0])-order.indexOf(b[0]));
+    }
+    function filterValue(show,grouping) {
+      if (grouping === 'venue') return venueKey(show);
+      if (grouping === 'artist') return normalizedArtist(show.artist);
+      if (grouping === 'city') return cityLabel(show).toLocaleLowerCase();
+      if (grouping === 'region') return regionFor(show);
+      if (grouping === 'artistCategory') return artistCategoryFor(show);
+      return show.date.slice(0,4);
+    }
+    function updateGroupFilter(grouping) {
+      const filter = $('#groupFilter');
+      const selected = filter.value;
+      let options, allLabel, ariaLabel;
+      if (grouping === 'venue') {
+        allLabel = '所有场馆'; ariaLabel = '按场馆筛选';
+        options = geographicGroups(shows,'venue').map(([label,list]) => [venueKey(list[0]),label]);
+      } else if (grouping === 'artist') {
+        allLabel = '所有艺人'; ariaLabel = '按艺人筛选';
+        options = geographicGroups(shows,'artist').map(([label]) => [normalizedArtist(label),label]);
+      } else if (grouping === 'city') {
+        allLabel = '所有城市'; ariaLabel = '按城市筛选';
+        options = geographicGroups(shows,'city').map(([label]) => [label.toLocaleLowerCase(),label]);
+      } else if (grouping === 'region') {
+        allLabel = '全部地区'; ariaLabel = '按海内外筛选';
+        options = geographicGroups(shows,'region').map(([label]) => [label,label]);
+      } else if (grouping === 'artistCategory') {
+        allLabel = '全部艺人'; ariaLabel = '按艺人分类筛选';
+        options = geographicGroups(shows,'artistCategory').map(([label]) => [label,label]);
+      } else {
+        allLabel = '所有年份'; ariaLabel = '按年份筛选';
+        options = [...new Set(shows.map(s => s.date.slice(0,4)))].sort((a,b) => b.localeCompare(a)).map(year => [year,year+' 年']);
+      }
+      filter.innerHTML = `<option value="all">${allLabel}</option>` + options.map(([value,label]) => `<option value="${escapeHtml(value)}">${escapeHtml(label)}</option>`).join('');
+      filter.value = options.some(([value]) => value === selected) ? selected : 'all';
+      filter.setAttribute('aria-label',ariaLabel);
+    }
+    function updateSortAvailability() {
+      const flat = $('#groupSelect').value === 'flat';
+      $('#sortSelect').querySelector('option[value="artist"]').disabled = flat;
+      if (flat && $('#sortSelect').value === 'artist') $('#sortSelect').value = 'new';
+    }
+    function changeGrouping() {
+      $('#groupFilter').value = 'all';
+      updateSortAvailability();
+      render();
+    }
+    function setView(mode) {
+      viewMode = mode;
+      updateSortAvailability();
+      for (const [name,button] of [['grid','#gridViewBtn'],['timeline','#timelineViewBtn']]) {
+        $(button).classList.toggle('active', mode===name); $(button).setAttribute('aria-pressed', String(mode===name));
+      }
+      render();
+    }
+    function render() {
+      const years = new Set(shows.map(s => s.date.slice(0,4)));
+      const cities = new Set(shows.map(s => s.city.toLocaleLowerCase()));
+      $('#statShows').textContent = shows.length;
+      $('#statCities').textContent = cities.size;
+      $('#statYears').textContent = years.size;
+      $('#collectionCount').textContent = `${shows.length} 场`;
+      const grouping = $('#groupSelect').value;
+      updateSortAvailability();
+      updateGroupFilter(grouping);
+      const selectedFilter = $('#groupFilter').value;
+      const q = $('#searchInput').value.trim().toLocaleLowerCase();
+      const sort = $('#sortSelect').value;
+      let filtered = shows.filter(s => (selectedFilter === 'all' || filterValue(s,grouping) === selectedFilter) && (!q || [s.artist,s.tour,s.city,s.country,s.venue,s.seat,s.notes,s.date].some(v => v.toLocaleLowerCase().includes(q))));
+      filtered.sort((a,b) => sort==='artist' ? a.artist.localeCompare(b.artist,'zh-CN') || b.date.localeCompare(a.date) : sort==='old' ? a.date.localeCompare(b.date) || a.artist.localeCompare(b.artist,'zh-CN') : b.date.localeCompare(a.date) || a.artist.localeCompare(b.artist,'zh-CN'));
+      const collection = $('#collection');
+      if (filtered.length===0) {
+        collection.innerHTML = shows.length === 0
+          ? `<section class="empty"><div class="empty-icon">${icons('music')}</div><h3>你的第一场，值得被珍藏。</h3><p>从最难忘的一场开始，慢慢把去过的现场<br>变成一面属于自己的演唱会海报墙。</p><button class="button primary" type="button" data-add>${icons('plus')} 添加第一场演唱会</button></section>`
+          : `<section class="empty"><div class="empty-icon">${icons('search')}</div><h3>没有找到符合条件的演出</h3><p>试试其他关键词或筛选条件，<br>也可以清空筛选后查看所有收藏。</p><button class="button" type="button" id="clearFilters">清空筛选</button></section>`;
+        return;
+      }
+      if (['artist','venue','city','region','artistCategory'].includes(grouping)) {
+        const timeline = viewMode === 'timeline';
+        collection.innerHTML = geographicGroups(filtered,grouping).map(([label,list]) => `<section class="year-section grouped-section" data-group-kind="${grouping}"><div class="year-heading"><span class="year-label">${escapeHtml(label)}</span><span class="year-sub">${list.length} 场演出</span><span class="year-line"></span></div><div class="${timeline ? 'timeline' : 'grid-cards'}">${list.map(timeline ? timelineMarkup : cardMarkup).join('')}</div></section>`).join('');
+        return;
+      }
+      if (grouping === 'flat') {
+        const timeline = viewMode === 'timeline';
+        collection.innerHTML = `<section class="year-section continuous-section" aria-label="按日期连续排列的演唱会"><div class="${timeline ? 'timeline' : 'grid-cards'}">${filtered.map(timeline ? timelineMarkup : cardMarkup).join('')}</div></section>`;
+        return;
+      }
+      const groups = new Map();
+      for (const s of filtered) { const year=s.date.slice(0,4); if(!groups.has(year)) groups.set(year,[]); groups.get(year).push(s); }
+      collection.innerHTML = [...groups].sort(([a],[b]) => sort === 'old' ? a.localeCompare(b) : b.localeCompare(a)).map(([year,list])=>`<section class="year-section"><div class="year-heading"><span class="year-label">${escapeHtml(year)}</span><span class="year-sub">${list.length} 场演出</span><span class="year-line"></span></div><div class="${viewMode==='grid'?'grid-cards':'timeline'}">${list.map(s=>viewMode==='grid'?cardMarkup(s):timelineMarkup(s)).join('')}</div></section>`).join('');
+    }
+
+    function renderUpload() {
+      const el = $('#uploadZone');
+      if (safePoster(pendingPoster)) {
+        el.innerHTML = `<img src="${pendingPoster}" alt="海报预览"><span class="upload-overlay">点击更换海报</span>`;
+        $('#removePosterBtn').hidden = false;
+      } else {
+        el.innerHTML = `${icons('upload')}<strong>点击上传海报</strong><small>也可以拖入图片<br>JPG · PNG · WebP</small>`;
+        $('#removePosterBtn').hidden = true;
+      }
+    }
+    function openEditor(id=null) {
+      editingId = id;
+      const show = id ? shows.find(s => s.id===id) : null;
+      $('#editorForm').reset();
+      for(const field of editorFields) document.getElementById(field+'Input').value = show?.[field] || '';
+      $('#artistSuggestions').innerHTML = [...new Set(shows.map(s => s.artist))].sort((a,b) => a.localeCompare(b,'zh-CN')).map(name => `<option value="${escapeHtml(name)}"></option>`).join('');
+      categoryArtistKey = normalizedArtist(show?.artist || '');
+      $('#artistCategoryInput').value = show?.artistCategory || suggestedArtistCategory(show?.artist || '');
+      regionCityKey = normalizedCity(show?.city || '');
+      $('#regionInput').value = show?.region || savedCityRegion(show?.city || '');
+      pendingPoster = show?.poster || null;
+      renderUpload();
+      $('#editorTitle').textContent = show ? '编辑演唱会记录' : '记录一场演唱会';
+      $('#saveBtn').innerHTML = `${icons(show ? 'edit' : 'plus')} ${show ? '保存修改' : '保存到档案馆'}`;
+      openDialog('editorDialog');
+    }
+    async function fileToPoster(file) {
+      if (!file || !/^image\/(jpeg|png|webp|gif)$/.test(file.type)) throw new Error('请上传 JPG、PNG、WebP 或 GIF 图片');
+      if (file.size > 20 * 1024 * 1024) throw new Error('图片不能超过 20 MB');
+      const blobURL = URL.createObjectURL(file);
+      try {
+        const img = new Image();
+        img.src = blobURL;
+        await img.decode();
+        const maxEdge = 1500;
+        const scale = Math.min(1,maxEdge/Math.max(img.naturalWidth,img.naturalHeight));
+        if (!img.naturalWidth || !img.naturalHeight) throw new Error('无法读取图片');
+        const c = document.createElement('canvas');
+        c.width = Math.max(1,Math.round(img.naturalWidth*scale)); c.height = Math.max(1,Math.round(img.naturalHeight*scale));
+        const ctx = c.getContext('2d');
+        if (!ctx) throw new Error('浏览器无法处理图片');
+        ctx.fillStyle = '#181820'; ctx.fillRect(0,0,c.width,c.height);
+        ctx.imageSmoothingEnabled = true; ctx.imageSmoothingQuality = 'high';
+        ctx.drawImage(img,0,0,c.width,c.height);
+        let result = c.toDataURL('image/webp',.86);
+        if (!result.startsWith('data:image/webp;')) result = c.toDataURL('image/jpeg',.86);
+        if (!safePoster(result)) throw new Error('图片处理失败或体积过大');
+        return result;
+      } finally { URL.revokeObjectURL(blobURL); }
+    }
+    async function handlePosterFile(file) {
+      try { pendingPoster = await fileToPoster(file); renderUpload(); notify('海报已添加，保存记录后即会存入档案'); }
+      catch(err) { notify(err.message || '图片读取失败'); }
+    }
+    async function saveEditor(event) {
+      event.preventDefault();
+      const values = {};
+      for(const field of editorFields) values[field] = document.getElementById(field+'Input').value.trim();
+      if (!['chinese','international'].includes(values.artistCategory)) return notify('请选择华语艺人或国际艺人');
+      if (!['domestic','overseas'].includes(values.region)) return notify('请选择国内（内地）或海外及港澳台');
+      const previous = editingId ? shows.find(s=>s.id===editingId) : null;
+      const raw = { ...previous, ...values, id:previous?.id || uniqueId(), poster:pendingPoster, createdAt:previous?.createdAt || new Date().toISOString(), updatedAt:new Date().toISOString() };
+      const show = verifyShow(raw);
+      if (!show) return notify('请确认艺人、演出日期和城市填写正确');
+      const save = $('#saveBtn'); save.disabled = true;
+      try {
+        await saveMany([show,...relatedRecordUpdates(show)]);
+        shows = await loadShows();
+        closeDialog('editorDialog');
+        render();
+        notify(previous ? '演唱会档案已更新' : '已收藏这场演唱会 ✨');
+      } catch(err) { console.error(err); notify('保存失败：请检查浏览器存储空间，或尝试导出备份'); }
+      finally { save.disabled = false; }
+    }
+    function showDetail(id) {
+      const s = shows.find(x=>x.id===id);
+      if(!s) return;
+      detailId=id;
+      const place = [s.venue,s.city,s.country].filter(Boolean).join(' · ');
+      $('#detailContent').innerHTML = `<div class="detail-body"><div class="detail-image">${imageOrFallback(s)}</div><div class="detail-info"><div class="modal-overline">LIVE MEMORY / ${escapeHtml(s.date.slice(0,4))}</div><h3 id="detailTitle">${escapeHtml(s.artist)}</h3><div class="detail-tour">${escapeHtml(s.tour || '现场演出')}</div><div class="detail-divider"></div><div class="detail-row">${icons('calendar')}<div><small>日期与时间</small>${escapeHtml(niceDate(s.date))} · ${escapeHtml(dayOfWeek(s.date))}${s.time ? '<br>'+escapeHtml(s.time)+' 开演' : ''}</div></div><div class="detail-row">${icons('pin')}<div><small>演出地点</small>${escapeHtml(place)}</div></div>${s.seat?`<div class="detail-row">${icons('box')}<div><small>座位 / 区域</small>${escapeHtml(s.seat)}</div></div>`:''}${s.notes?`<div class="detail-divider"></div><div style="color:#a4a2ad;font-size:11px;font-weight:700">现场记忆</div><div class="note-box">${escapeHtml(s.notes)}</div>`:''}</div></div>`;
+      openDialog('detailDialog');
+    }
+    async function deleteCurrent() {
+      const s=shows.find(x=>x.id===detailId); if(!s) return;
+      if (!window.confirm(`确定要删除「${s.artist} · ${niceDate(s.date)}」吗？\n此操作不可撤销，除非你有此前导出的备份。`)) return;
+      try { await removeOne(s.id); shows = await loadShows(); closeDialog('detailDialog'); detailId=null; render(); notify('这条演唱会记录已删除'); }
+      catch(err) { console.error(err); notify('删除失败，请重试'); }
+    }
+    function exportBackup() {
+      try {
+        const exportedShows = shows.map(verifyShow);
+        if (exportedShows.some(show => !show)) throw new Error('部分档案内容无效，无法导出');
+        const data = { format:'encore-live-archive', version:1, exportedAt:new Date().toISOString(), shows:exportedShows };
+        const blob = new Blob([JSON.stringify(data,null,2)], {type:'application/json;charset=utf-8'});
+        const href=URL.createObjectURL(blob);
+        const link=document.createElement('a'); link.href=href; link.download=`ENCORE-演唱会档案-${new Date().toLocaleDateString('en-CA')}.json`;
+        document.body.appendChild(link); link.click(); link.remove();
+        setTimeout(()=>URL.revokeObjectURL(href),10000);
+        notify(`已导出 ${shows.length} 场演出及海报备份`);
+      } catch(err) { console.error(err); notify('导出失败，请重试'); }
+    }
+    async function importBackup(file) {
+      if(!file) return;
+      if(file.size > 150*1024*1024) return notify('备份文件超过 150 MB，无法导入');
+      try {
+        const raw=JSON.parse(await file.text());
+        if (!raw || raw.format!=='encore-live-archive' || !Array.isArray(raw.shows)) throw new Error('文件不是 ENCORE 格式的备份');
+        if(raw.shows.length>3000) throw new Error('备份中记录数量超出限制');
+        const verified=raw.shows.map(verifyShow);
+        if(verified.some(s=>!s)) throw new Error('部分记录缺少有效的艺人、日期或城市');
+        if (!window.confirm(`将从备份导入 ${verified.length} 场演唱会。\n现有记录不会清空；若记录 ID 相同，将以备份为准覆盖。\n确定继续？`)) return;
+        await saveMany(verified);
+        shows=await loadShows();
+        render(); closeDialog('backupDialog');
+        notify(`导入成功，当前共有 ${shows.length} 场演出`);
+      } catch(err) { console.error(err); notify('导入失败：'+(err.message || '文件无效')); }
+    }
+
+    document.addEventListener('click', e => {
+      const add=e.target.closest('[data-add]'); if(add) { openEditor(); return; }
+      const close=e.target.closest('[data-close]'); if(close) { closeDialog(close.dataset.close); return; }
+      const open=e.target.closest('[data-open]'); if(open) { showDetail(open.dataset.open); return; }
+      if(e.target.closest('#clearFilters')) { $('#searchInput').value=''; $('#groupFilter').value='all'; $('#sortSelect').value='new'; render(); }
+    });
+    $('#backupBtn').addEventListener('click', () => openDialog('backupDialog'));
+    $('#gridViewBtn').addEventListener('click', () => setView('grid'));
+    $('#timelineViewBtn').addEventListener('click', () => setView('timeline'));
+    $('#searchInput').addEventListener('input', render);
+    $('#groupFilter').addEventListener('change', render);
+    $('#groupSelect').addEventListener('change', changeGrouping);
+    $('#sortSelect').addEventListener('change', render);
+    $('#artistInput').addEventListener('input', updateArtistCategory);
+    $('#cityInput').addEventListener('input', updateCityRegion);
+    $('#editorForm').addEventListener('submit', saveEditor);
+    $('#uploadZone').addEventListener('click', () => $('#posterInput').click());
+    $('#uploadZone').addEventListener('keydown', e => { if(e.key==='Enter'||e.key===' ') { e.preventDefault(); $('#posterInput').click(); } });
+    $('#posterInput').addEventListener('change', async e => { await handlePosterFile(e.target.files?.[0]); e.target.value=''; });
+    for (const evt of ['dragenter','dragover']) $('#uploadZone').addEventListener(evt, e => { e.preventDefault(); $('#uploadZone').classList.add('dragging'); });
+    for (const evt of ['dragleave','drop']) $('#uploadZone').addEventListener(evt, e => { e.preventDefault(); $('#uploadZone').classList.remove('dragging'); });
+    $('#uploadZone').addEventListener('drop', e=>handlePosterFile(e.dataTransfer?.files?.[0]));
+    $('#removePosterBtn').addEventListener('click', () => { pendingPoster=null; renderUpload(); });
+    $('#editBtn').addEventListener('click', () => { const id=detailId; closeDialog('detailDialog'); openEditor(id); });
+    $('#deleteBtn').addEventListener('click', deleteCurrent);
+    document.addEventListener('error', e => { const id = e.target?.dataset?.posterId; const show = id && shows.find(s => s.id === id); if (show) e.target.outerHTML = fallbackPoster(show); }, true);
+    $('#exportBtn').addEventListener('click', exportBackup);
+    $('#importBtn').addEventListener('click', () => $('#importInput').click());
+    $('#importInput').addEventListener('change', async e => { await importBackup(e.target.files?.[0]); e.target.value=''; });
+    for(const dialog of document.querySelectorAll('dialog')) dialog.addEventListener('click', e => { if(e.target===dialog) dialog.close(); });
+    async function init() {
+      await initDB();
+      try {
+        shows = await loadShows();
+        render();
+      }
+      catch(err) { console.error(err); notify('无法读取已有收藏，请检查浏览器权限'); render(); }
+    }
+    init();
+  })();
+  </script>
+</body>
+</html>
